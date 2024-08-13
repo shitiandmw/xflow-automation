@@ -80,8 +80,8 @@ const App = () => {
       unregisterDataChangeHandler(handleFLowDataChange)
     }
   }, [])
-  return <div className='x-w-screen x-h-screen x-bg-gray-400 x-flex x-justify-center x-items-center x-flex-col x-gap-4'>
-    <div className='x-w-[1200px] x-h-16 x-border x-rounded-lg x-bg-white x-flex x-items-center x-px-4 x-gap-2'>
+  return <div className='x-w-screen x-h-screen x-bg-gray-400 x-flex x-justify-center x-items-center x-flex-col'>
+    <div className='x-w-full x-h-14 x-pl-2 x-border-b x-bg-white x-flex x-items-center x-gap-1 '>
       <div onClick={getFlowData} className=' x-rounded x-border x-bg-blue-500  x-text-gray-50 x-p-4 x-w-32 x-h-10 x-cursor-pointer x-flex x-justify-center x-items-center '>
         获取数据
       </div>
@@ -93,8 +93,7 @@ const App = () => {
       </div>
     </div>
 
-    <div className='x-w-[1200px] x-h-[800px] x-border x-rounded-lg x-bg-white'>
-
+    <div className='x-w-full x-flex-1 x-bg-white x-overflow-hidden'>
       <XFlowExtend mode={mode} ref={flowRef} />
     </div>
   </div>
