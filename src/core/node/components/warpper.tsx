@@ -1,10 +1,14 @@
-import React from "react";
+import React,{useMemo} from "react";
 
 const NodeWarpper = (Component: React.FC) => {
-    return ({ node }: any) => {
-        const props = node?.getData();
-        return <Component {...props} isCanvas={true} />
-    }
+    return (props: any) => {
+        const { node, ...rest } = props;
+        const componentProps = node?.getData();
+        const memoizedData = useMemo(() => node.getData(), [node]);
+        console.log("componentProps", componentProps)
+        const MemoizedComponent = React.memo(Component);
+        return <MemoizedComponent {...memoizedData} {...rest} node={node} isDrag={true} />;
+    };
 }
 
 export {NodeWarpper};

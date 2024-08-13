@@ -1,6 +1,6 @@
 import React from "react";
 import { NodeMeta } from "../types";
-import ports from "./ports";
+// import ports from "./ports";
 import { NodeWarpper } from "./components"
 import { NodeRegistryProps } from "../types"
 
@@ -10,13 +10,14 @@ const nodeRegistry: { [name: string]: NodeRegistryProps } = {};
 const defaultNodeProps = {
     width: 150,
     height: 40,
-    ports: ports,
+    // ports: ports,
 }
 
 export function registerNode(name: string, component: React.FC<any>, meta: NodeMeta, props?: any) {
     nodeRegistry[name] = {
         component,
-        warpper: NodeWarpper(component),
+        // warpper: NodeWarpper(component),
+        warpper: component,
         meta,
         props: {
             ...defaultNodeProps,

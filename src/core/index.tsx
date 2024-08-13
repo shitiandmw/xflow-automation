@@ -1,4 +1,4 @@
-import { Graph, XFlow, Path, XFlowGraph, Clipboard, Control, Grid } from '@antv/xflow';
+import { Graph, XFlow, Path, XFlowGraph, Clipboard, Control, Background, Portal } from '@antv/xflow';
 import { DAG_CONNECTOR } from './consts';
 import Panel from './panel';
 import Setter from './setter';
@@ -16,12 +16,15 @@ import { EndNode, EndNodeMeta } from "./node";
 import { StartNode, StartNodeMeta } from "./node";
 import { getNode } from './node'
 
+import { AutoNodeMeta, AutoNode } from './node';
+
 // 注册节点
 // registerNode("AudioNode", AudioNode, AudioNodeMeta, { width:200, height:100 })
 registerNode("StartNode", StartNode, StartNodeMeta)
 registerNode("AudioNode", AudioNode, AudioNodeMeta)
 registerNode("CcNode", CcNode, CcNodeMeta)
 registerNode("EndNode", EndNode, EndNodeMeta)
+registerNode("AutoNode", AutoNode, AutoNodeMeta)
 
 // 注册设置器
 registerSetter("StringSetter", StringSetter)
@@ -37,16 +40,16 @@ Graph.registerConnector(
     DAG_CONNECTOR,
     (s, e) => {
         const offset = 4;
-        const deltaY = Math.abs(e.y - s.y);
-        const control = Math.floor((deltaY / 3) * 2);
+        const deltaX = Math.abs(e.x - s.x);
+        const control = Math.floor((deltaX / 3) * 2);
 
-        const v1 = { x: s.x, y: s.y + offset + control };
-        const v2 = { x: e.x, y: e.y - offset - control };
+        const v1 = { x: s.x + offset + control, y: s.y };
+        const v2 = { x: e.x - offset - control, y: e.y };
 
         return Path.normalize(
             `M ${s.x} ${s.y}
-       L ${s.x} ${s.y + offset}
-       C ${v1.x} ${v1.y} ${v2.x} ${v2.y} ${e.x} ${e.y - offset}
+       L ${s.x + offset} ${s.y}
+       C ${v1.x} ${v1.y} ${v2.x} ${v2.y} ${e.x - offset} ${e.y}
        L ${e.x} ${e.y}
       `,
         );
@@ -54,9 +57,11 @@ Graph.registerConnector(
     true,
 );
 
+
 export interface XFlowExtendProps {
     mode?: string;
 }
+
 // 流程引擎 
 const XFlowExtend = forwardRef(({ mode = "desgin" }: XFlowExtendProps, ref) => {
     const registerEdge = (edgeMeta: EdgeMeta) => {
@@ -94,6 +99,7 @@ const XFlowExtend = forwardRef(({ mode = "desgin" }: XFlowExtendProps, ref) => {
                     },
                 },
             });
+
         } catch (error) {
         }
 
@@ -141,7 +147,7 @@ const XFlowExtend = forwardRef(({ mode = "desgin" }: XFlowExtendProps, ref) => {
                 <div className={'x-w-44 x-h-full x-border-r ' + (mode == "desgin" ? '' : 'x-hidden')}>
                     <Panel />
                 </div>
-                <div className=' x-flex-1 x-relative x-overflow-hidden'>
+                <div className=' x-flex-1 x-relative x-overflow-hidden x-bg-gray-100'>
                     <XFlowGraph
                         pannable
                         zoomable
@@ -165,31 +171,17 @@ const XFlowExtend = forwardRef(({ mode = "desgin" }: XFlowExtendProps, ref) => {
                             zIndex: -1,
                         }}
                     />
-
-                    <div className=' x-absolute x-top-2 x-left-2 x-shadow x-rounded'>
+                    <Background color="#f3f4f6" />
+                    <div className=' x-absolute x-top-2 x-left-2 x-shadow x-rounded x-bg-white'>
                         <Control
                             items={['zoomOut', 'zoomTo', 'zoomIn', 'zoomToFit', 'zoomToOrigin']}
                         />
                     </div>
                 </div>
 
-                <Grid
-                    type="doubleMesh"
-                    size={10}
-                    options={[
-                        {
-                            color: '#E7E8EA',
-                            thickness: 1,
-                        },
-                        {
-                            color: '#f7f7f7',
-                            thickness: 1,
-                            factor: 4,
-                        },
-                    ]}
-                />
                 <Keyboard ref={eventRef} mode={mode} />
                 <Clipboard />
+                {/* <div className='x-w-52'><Setter /></div> */}
                 {/* <Transform resizing rotating /> */}
             </div>
 

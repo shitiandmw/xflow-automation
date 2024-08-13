@@ -1,13 +1,19 @@
 import { register, useDnd } from '@antv/xflow';
+import { useGraphEvent, useGraphStore } from '@antv/xflow';
 import { nanoid } from 'nanoid'
-import React, { useEffect, useState } from "react";
-import { Node } from "./types";
+import React, { useEffect, useState, useRef } from "react";
+import { Node, NodeRef } from "./types";
 import { getNodes } from "./node";
+
 
 
 const Panel = () => {
     const [nodes, setNodes] = useState<Array<Node>>([]);
+    const updateNode = useGraphStore((state) => state.updateNode);
     const { startDrag } = useDnd();
+    const nodeRef = useRef<NodeRef>(null);
+
+
     const registerNode = (node: Node) => {
         setNodes(prev => {
             if (prev.find(n => n.name === node.name)) {
@@ -33,12 +39,14 @@ const Panel = () => {
                 data[prop.name] = prop.defaultValue
             else data[prop.name] = ""
         })
+        // const { width, height } = nodeRef.current!?.getBoundingClientRect();
+        // console.log(width, height)
         startDrag(
             {
                 id: id,
                 shape: node.name,
                 data: data,
-                ...node.props
+                ...node.props,
             },
             e,
         );
@@ -60,7 +68,7 @@ const Panel = () => {
     return <div className="x-w-full x-h-full x-box-border x-p-3 x-flex x-flex-col x-gap-y-2">
         {nodes.map(node => {
             return <div className="x-w-full x-h-8" onMouseDown={(e) => handleMouseDown(e, node)} key={node.name}>
-                <node.component />
+                <node.component ref={nodeRef} />
             </div>
         })}
     </div>;

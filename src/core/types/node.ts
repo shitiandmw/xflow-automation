@@ -19,9 +19,17 @@ export interface NodeRegistryProps {
     component: React.FC<any>
     meta: NodeMeta
     props?: any
-    warpper: ReturnType<typeof NodeWarpper>
+    warpper: React.FC<any>
+    // warpper: ReturnType<typeof NodeWarpper>
 }
 export interface NodeData {
     id: string;
     data: any;
 }
+
+export interface NodeRef {
+    getBoundingClientRect: () => {
+        width: number;
+        height: number;
+    }
+} 
