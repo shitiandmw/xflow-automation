@@ -1,44 +1,19 @@
 import './App.css'
-import XFlowExtend, { registerSetter, registerNode, setEdgeMeta, setEdgeProps ,FLowMetaData ,registerDataChangeHandler, unregisterDataChangeHandler} from './core'
+import XFlowAutomation, { registerSetter, FLowMetaData, registerDataChangeHandler, unregisterDataChangeHandler, registerNodeProps } from './core'
 import { StringSetter, BooleanSetter, RadioGroupSetter } from './core/setter'
-import { CcNode, CcNodeMeta } from "./core/node";
-import { AudioNode, AudioNodeMeta } from "./core/node";
-import { EndNode, EndNodeMeta } from "./core/node";
+
 import React, { useEffect } from 'react';
-import { setFlowProps } from './core';
 
+import { nodeProps } from './nodeDatas';
 
-// 注册自定义的节点
-// registerNode("AudioNode", AudioNode, AudioNodeMeta, { width:200, height:100 })
-registerNode("AudioNode", AudioNode, AudioNodeMeta)
-registerNode("CcNode", CcNode, CcNodeMeta)
-registerNode("EndNode", EndNode, EndNodeMeta)
- 
+nodeProps.forEach(nodeProp => {
+  registerNodeProps(nodeProp)
+})
+
 // 注册自定义的设置器
 registerSetter("StringSetter", StringSetter)
 registerSetter("BooleanSetter", BooleanSetter)
 registerSetter("RadioGroupSetter", RadioGroupSetter)
-
-// 设置连接线的颜色
-setEdgeMeta({ color: '#000000' })
-// 设置连接线属性
-setEdgeProps(prev => {
-  return [...prev,
-  {
-    name: "demo",
-    title: "测试新增的连接线属性",
-    setter: "StringSetter"
-  }] 
-})
-// 设置流程属性
-setFlowProps(prev => {
-  return [...prev,
-  {
-    name: "demo",
-    title: "测试新增的流程属性",
-    setter: "StringSetter"
-  }]
-})
 
 
 type FlowRefType = {
@@ -46,8 +21,8 @@ type FlowRefType = {
   setFlowData: (data: any) => void;
 };
 const App = () => {
-  const [mode,setMode] = React.useState('desgin')
-  const handleFLowDataChange = (data:FLowMetaData) => {
+  const [mode, setMode] = React.useState('desgin')
+  const handleFLowDataChange = (data: FLowMetaData) => {
     console.log('流程数据变化', data)
     localStorage.setItem('flowData', JSON.stringify(data))
   }
@@ -59,9 +34,9 @@ const App = () => {
   }
   const setFlowData = () => {
     const flowData = JSON.parse(localStorage.getItem('flowData') || '{}')
-    console.log("flowData*********",flowData)
-    if(flowData?.edges)
-      flowData.edges = flowData.edges.map((edge : any) => {
+    console.log("flowData*********", flowData)
+    if (flowData?.edges)
+      flowData.edges = flowData.edges.map((edge: any) => {
         edge.shape = "ignore_edge"
         if (edge?.label) {
           edge.label.attrs.text.opacity = 0.2
@@ -71,8 +46,8 @@ const App = () => {
     flowRef.current?.setFlowData(flowData)
     console.log('设置数据', flowData)
   }
-  const handleMode = ()=>{
-    setMode(mode === 'view'? 'desgin' : 'view')
+  const handleMode = () => {
+    setMode(mode === 'view' ? 'desgin' : 'view')
   }
   useEffect(() => {
     registerDataChangeHandler(handleFLowDataChange)
@@ -94,7 +69,7 @@ const App = () => {
     </div>
 
     <div className='x-w-full x-flex-1 x-bg-white x-overflow-hidden'>
-      <XFlowExtend mode={mode} ref={flowRef} />
+      <XFlowAutomation mode={mode} ref={flowRef} />
     </div>
   </div>
 }

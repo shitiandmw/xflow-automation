@@ -1,74 +1,64 @@
-import { register, useDnd } from '@antv/xflow';
-import { useGraphEvent, useGraphStore } from '@antv/xflow';
+import { useDnd } from '@antv/xflow';
 import { nanoid } from 'nanoid'
-import React, { useEffect, useState, useRef } from "react";
-import { Node, NodeRef } from "./types";
+import React, { useEffect, useState } from "react";
+import {   NodeRegistryProps } from "./types";
 import { getNodes } from "./node";
-
+import { AutoNode } from './node';
 
 
 const Panel = () => {
-    const [nodes, setNodes] = useState<Array<Node>>([]);
-    const updateNode = useGraphStore((state) => state.updateNode);
+    const [nodes, setNodes] = useState<Array<NodeRegistryProps>>([]);
     const { startDrag } = useDnd();
-    const nodeRef = useRef<NodeRef>(null);
 
-
-    const registerNode = (node: Node) => {
-        setNodes(prev => {
-            if (prev.find(n => n.name === node.name)) {
-                return prev;
-            }
-            // 注册自定义节点
-            register({
-                shape: node.name,
-                component: node.warpper,
-                effect: ['data'],
-                ...node.props
-            });
-            return [...prev, node];
-        });
-    }
-    const handleMouseDown = (e: React.MouseEvent<Element, MouseEvent>, node: Node) => {
+    const handleMouseDown = (e: React.MouseEvent<Element, MouseEvent>, node: NodeRegistryProps) => {
         const id = nanoid()
-        const data = {} as any
+        let data = node
         data.id = id
-        data.props = node.meta.props
-        node.meta.props?.forEach(prop => {
-            if ("defaultValue" in prop)
-                data[prop.name] = prop.defaultValue
-            else data[prop.name] = ""
-        })
-        // const { width, height } = nodeRef.current!?.getBoundingClientRect();
-        // console.log(width, height)
+        // data.props = node.meta.props
+        data.isDrag = true
+        let width = data.width || 500
+        let height = data.height || 500
+        // node.meta.props?.forEach(prop => {
+        //     if ("defaultValue" in prop)
+        //         data[prop.name] = prop.defaultValue
+        //     else data[prop.name] = ""
+        // })
+        // // const { width, height } = nodeRef.current!?.getBoundingClientRect();
+        // // console.log(width, height)
         startDrag(
             {
                 id: id,
-                shape: node.name,
+                shape: node.shape,
                 data: data,
-                ...node.props,
+                height: height,
+                width: width,
+                node:{
+                    getData: () => {
+                        return data
+                     },
+                }
             },
             e,
         );
     }
 
     useEffect(() => {
-        for (const nodeName in getNodes()) {
-            const node = getNodes()[nodeName]
-            registerNode({
-                name: nodeName,
-                meta: node.meta,
-                component: node.component,
-                warpper: node.warpper,
-                props: node.props
-            })
+        const nodes_ = []
+        const nodeMaps = getNodes()
+        for (const key in nodeMaps) {
+            nodes_.push(nodeMaps[key])
         }
+        setNodes(nodes_)
     }, [])
 
     return <div className="x-w-full x-h-full x-box-border x-p-3 x-flex x-flex-col x-gap-y-2">
         {nodes.map(node => {
-            return <div className="x-w-full x-h-8" onMouseDown={(e) => handleMouseDown(e, node)} key={node.name}>
-                <node.component ref={nodeRef} />
+            return <div  className="x-w-full x-h-8" onMouseDown={(e) => handleMouseDown(e, node)} key={node.id}>
+                <AutoNode node={{
+                    getData: () => {
+                       return { label: node.label,}
+                    },
+                }} />
             </div>
         })}
     </div>;

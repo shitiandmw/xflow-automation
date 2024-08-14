@@ -1,30 +1,81 @@
-import { Graph, XFlow, Path, XFlowGraph, Clipboard, Control, Background, Portal } from '@antv/xflow';
+import { Graph, XFlow, Path, XFlowGraph, Clipboard, Control, Background,register } from '@antv/xflow';
 import { DAG_CONNECTOR } from './consts';
 import Panel from './panel';
-import Setter from './setter';
+// import Setter from './setter';
 import { Keyboard } from './keyboard';
 import { getEdgeMeta } from './edge';
 import React, { forwardRef } from 'react';
 import { getFlowData, setFlowData } from './flow'
 import { EdgeMeta, FLowMetaData } from './types';
 
-import { registerNode } from './node'
 import { StringSetter, BooleanSetter, RadioGroupSetter, registerSetter } from './setter'
-import { CcNode, CcNodeMeta } from "./node";
-import { AudioNode, AudioNodeMeta } from "./node";
-import { EndNode, EndNodeMeta } from "./node";
-import { StartNode, StartNodeMeta } from "./node";
-import { getNode } from './node'
+import { AutoNode } from './node';
 
-import { AutoNodeMeta, AutoNode } from './node';
+const output_circle = {
+    r: 6,
+    magnet: true,
+    stroke: '#0284c7',
+    strokeWidth: 1,
+    fill: '#fff',
+}
+const input_circle = {
+    r: 6,
+    magnet: true,
+    stroke: '#31d0c6',
+    strokeWidth: 1,
+    fill: '#fff',
+}
+const point_group = {
+    input: {
+        position: 'left',
+        attrs: {
+            circle: input_circle,
+        },
+    },
+    output: {
+        position: 'right',
+        attrs: {
+            circle: output_circle,
+        },
+    },
+    custom_input: {
+        position: 'absolute',
+        attrs: {
+            circle: input_circle,
+        },
+    },
+    custom_output: {
+        position: 'absolute',
+        attrs: {
+            circle: output_circle,
+        },
+    },
+}
+// import { getNode } from './node'
 
-// 注册节点
-// registerNode("AudioNode", AudioNode, AudioNodeMeta, { width:200, height:100 })
-registerNode("StartNode", StartNode, StartNodeMeta)
-registerNode("AudioNode", AudioNode, AudioNodeMeta)
-registerNode("CcNode", CcNode, CcNodeMeta)
-registerNode("EndNode", EndNode, EndNodeMeta)
-registerNode("AutoNode", AutoNode, AutoNodeMeta)
+ // 注册自定义节点
+ register({
+    shape: "AutoNode",
+    component: AutoNode,
+    effect: ['data'],
+    ports:{
+        items: [
+            {
+                id: 'default_input',
+                group: 'input',
+                type: 'input',
+            },
+            {
+                id: 'default_output',
+                group: 'output',
+                type: 'output',
+            },
+
+        ],
+        groups: point_group,
+    }
+
+});
 
 // 注册设置器
 registerSetter("StringSetter", StringSetter)
@@ -63,7 +114,7 @@ export interface XFlowExtendProps {
 }
 
 // 流程引擎 
-const XFlowExtend = forwardRef(({ mode = "desgin" }: XFlowExtendProps, ref) => {
+const XFlowAutomation = forwardRef(({ mode = "desgin" }: XFlowExtendProps, ref) => {
     const registerEdge = (edgeMeta: EdgeMeta) => {
         try {
             Graph.registerEdge(edgeMeta.id, {
@@ -116,25 +167,6 @@ const XFlowExtend = forwardRef(({ mode = "desgin" }: XFlowExtendProps, ref) => {
     React.useImperativeHandle(ref, () => ({
         getFlowData: getFlowData,
         setFlowData: (data: FLowMetaData) => {
-            if (data.nodes && data.nodes.length > 0) {
-                data.nodes = data.nodes.map(node => {
-                    const newNode = { ...node }
-                    newNode.selected = false;
-                    const nodeMeta = getNode(node?.shape || "")
-                    if (nodeMeta) {
-                        const nodeMetaProps = nodeMeta.meta.props
-                        newNode.data = { ...(newNode?.data || []), props: nodeMetaProps, selected: false }
-                    }
-                    return newNode
-                })
-            }
-            if (data.edges && data.edges.length > 0) {
-                data.edges = data.edges.map(edge => {
-                    const newEdge = { ...edge }
-                    newEdge.selected = false;
-                    return newEdge
-                })
-            }
             eventRef.current?.setFlowData(data)
             setFlowData(data)
         },
@@ -144,7 +176,7 @@ const XFlowExtend = forwardRef(({ mode = "desgin" }: XFlowExtendProps, ref) => {
     return <div className='x-w-full x-h-full  x-text-sm '>
         <XFlow >
             <div className='x-w-full x-h-full x-flex '>
-                <div className={'x-w-44 x-h-full x-border-r ' + (mode == "desgin" ? '' : 'x-hidden')}>
+                <div className={'x-w-44 x-h-full x-border-r x-border-gray-200 x-bg-[#f7f7fa] ' + (mode == "desgin" ? '' : 'x-hidden')}>
                     <Panel />
                 </div>
                 <div className=' x-flex-1 x-relative x-overflow-hidden x-bg-gray-100'>
@@ -171,7 +203,7 @@ const XFlowExtend = forwardRef(({ mode = "desgin" }: XFlowExtendProps, ref) => {
                             zIndex: -1,
                         }}
                     />
-                    <Background color="#f3f4f6" />
+                    <Background color="#f2f3f5" />
                     <div className=' x-absolute x-top-2 x-left-2 x-shadow x-rounded x-bg-white'>
                         <Control
                             items={['zoomOut', 'zoomTo', 'zoomIn', 'zoomToFit', 'zoomToOrigin']}
@@ -189,7 +221,7 @@ const XFlowExtend = forwardRef(({ mode = "desgin" }: XFlowExtendProps, ref) => {
     </div>;
 })
 
-export default XFlowExtend;
+export default XFlowAutomation;
 
 export * from './types'
 export * from './setter'

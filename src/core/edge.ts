@@ -3,8 +3,8 @@ import { DAG_EDGE } from './consts'
 
 const defaultEdgeMeta: EdgeMeta = {
     id: DAG_EDGE,
-    color: '#5fcfad',  // '
-    width: 1,
+    color: '#3b82f6',  // '
+    width: 2,
     props: [
         {
             name: "label",

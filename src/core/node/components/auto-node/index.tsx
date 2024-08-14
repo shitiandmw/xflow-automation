@@ -1,173 +1,212 @@
 
 import { useEffect, useState } from 'react';
-import React, { useImperativeHandle } from 'react';
+import React, {  } from 'react';
 import mata from './meta'
 import { eventEmitter } from '../../../events';
-// import { debounce } from 'lodash';
-export interface AutoNodeProps {
-    id: string;
-    isDrag?: boolean;
-    isCanvas?: boolean;
-    selected?: boolean;
-    label?: string;
-    inputs: any[],
-    outputs: any[],
-}
-// 输出参数类型结构
-const outputTypes = [
-    { label: "用户名称", id: "user_name", column_type: "String", required: false, component_name: "Field.Input" },
-    {
-        label: "所属部门", id: "user_depts", column_type: "Array<User>", required: false, component_name: "Field.Input", children: [
-            { label: "部门id", id: "dept_id", column_type: "Number", required: false, component_name: "Field.Input" },
-            { label: "部门名称", id: "dept_name", column_type: "String", required: false, component_name: "Field.Input" },
-        ]
-    },
-]
-const inputTypes = [
-    {
-        label: "用户名称", id: "user_name", column_type: "String", required: false, component_name: "Field.Input", setter: {
-            name: "StringSetter",
-            props: {}
-        }
-    },
-]
+import SvgMore from "./svg-more"
+import { isEqual } from "lodash"
+import { NodeRegistryProps,MetaColumn } from "../../../types"
+import { useCreation } from 'ahooks';
+import { getSetter } from "../../../setter/setterRegistry";
+
+import { createPromiseWrapper } from "../../../utils"
+
 
 const AutoNode = (props: any) => {
-
-    
-    const [data, setData] = useState<AutoNodeProps>()
+    const containerRef = React.useRef<HTMLDivElement | null>(null);
+    const inputRefs = React.useRef<Array<HTMLDivElement | null>>([]);
+    const outputRefs = React.useRef<Array<HTMLDivElement | null>>([]);
+    const [data, setData] = useState<NodeRegistryProps>()
+    const inputPromiseRef = useCreation(() => {
+        return createPromiseWrapper();
+    }, []);
+    const outPromiseRef = useCreation(() => {
+        return createPromiseWrapper();
+    }, []);
     useEffect(() => {
-        const nodeData = props.node.getData()
-        nodeData.input
-        typeof props.node?.getData === 'function' && setData(nodeData)
+        if (typeof props.node?.getData === 'function') {
+            const nodeData = props.node.getData()
+            if (isEqual(nodeData, data)) return
+            setData(nodeData)
+        }
     }, [props])
-
-    // useEffect(()=>{
-    //     if (props.isCanvas) {
-    //         props.updateNode({width:600})
-    //     }
-    // },[props.isCanvas])
-
 
     const inputChangeHandler = (e: any) => {
         // const data = props.node.getData()
         // console.log("data", data)
         props.node.setData({ ...data, label: e.target.value })
-
     };
-    // const updateInput = ()=>{
-    //     if (!props.isCanvas) return 
-    //     eventEmitter.emit('updateNode', props.id, { data:{ ...props, label: props.label + "1"}})
-    //     setTimeout(() => {
-    //         updateInput()
-    //     }, 4000);
-    // }
 
-    // useEffect(()=>{
-    //     updateInput()
-    // },[])
-    useEffect(() => {
-        if (data && data?.isCanvas) {
-            eventEmitter.emit('updateNode', data.id, {
-                width: 300,
-                ports: {
-                    items: [
-                        {
-                            id: 'port1',
-                            group: 'input',
-                            args: { x: 0, y: 20 },
-                            type: 'input',
-                            datatype: "string",
-                        },
-                        {
-                            id: 'port2',
-                            group: 'input',
-                            args: { x: 0, y: 40 },
-                            type: 'input',
-                            datatype: "number"
-                        },
-                        {
-                            id: 'port3',
-                            group: 'output',
-                            args: { x: 300, y: 20 },
+    const computePoints = async () => {
+        if (!data || !data?.isCanvas) return
+        let width = data.width || 500
+        const ports_items = []
+        const parent_rect = containerRef.current?.getBoundingClientRect()
+        data.outputTypes = data.outputTypes || []
+        if (data.outputTypes.length > 0 && data.outputTypes.findIndex(item => item.is_point) >= 0) {
+            await outPromiseRef.promise
+            for (let i = 0; i < data.outputTypes.length; i++) {
+                if (data.outputTypes[i].is_point) {
+                    let ref = outputRefs.current[i]
+                    if (ref) {
+                        const rect = ref.getBoundingClientRect()
+                        let x = width
+                        let y = rect?.y - parent_rect!?.y + rect?.height / 2;
+                        ports_items.push({
+                            id: data.outputTypes[i].id,
+                            group: 'custom_output',
+                            args: { x, y },
                             type: 'output',
-                            datatype: "string"
-                        },
-                        {
-                            id: 'port4',
-                            group: 'output',
-                            args: { x: 300, y: 40 },
-                            type: 'output',
-                            datatype: "number"
-                        },
-                    ],
-                    groups: {
-                        input: {
-                            position: 'absolute',
-                            attrs: {
-                                circle: {
-                                    r: 4,
-                                    magnet: true,
-                                    stroke: '#31d0c6',
-                                    strokeWidth: 1,
-                                    fill: '#fff',
-                                },
-                            },
-                        },
-                        output: {
-                            position: 'absolute',
-                            attrs: {
-                                circle: {
-                                    r: 4,
-                                    magnet: true,
-                                    stroke: '#0284c7',
-                                    strokeWidth: 1,
-                                    fill: '#fff',
-                                },
-                            },
-                        },
-                    },
-                },
-            })
+                            is_point: true,
+                        })
+                    }
+                }
+            }
         }
+        else ports_items.push({ id: 'default_output', group: 'output', type: 'output' })
+        ports_items.push({ id: 'default_input', group: 'input', type: 'input' })
+        eventEmitter.emit('updateNode', data.id, {
+            ports: {
+                items: ports_items,
+            },
+        })
+    }
+    const updateRect = () => {
+        if (!data || !data?.isCanvas) return
+        setTimeout(() => {
+            let width = data.width || 500
+            const rect = containerRef.current?.getBoundingClientRect();
+            const height = rect?.height || 300
+            const nodeRect = {
+                width: width,
+                height: height,
+            }
+            eventEmitter.emit('updateNode', data.id, nodeRect)
+            computePoints()
+        }, 100);
+    }
+
+    const handInputSettleChange = (propName: string, value: any) => {
+        const oldInputSettle = data?.inputSettles || {}
+        const updatedInputSettle = {
+            ...oldInputSettle,
+            [propName]: value
+        };
+        props.node.setData({ ...data, inputSettles: updatedInputSettle })
+    }
+    const handleChangeOutputTypes = (outputTypes: MetaColumn[]) => {
+        props.node.setData({...data, outputTypes: outputTypes })
+    }
+    // useEffect(() => {
+    //     if (data?.isCanvas && containerRef.current) {
+    //         let width = data.width || 500
+    //         props?.node.removePorts();
+    //         eventEmitter.emit('updateNode', data.id, {
+    //             width: width
+    //         })
+    //     }
+    // }, [data?.isCanvas, containerRef.current])
+    useEffect(() => {
+        // if (data?.isCanvas && containerRef.current) updateRect();
     }, [data])
 
-    if (!data || !data?.isCanvas) return <div className='x-w-full x-h-full x-flex x-items-center x-justify-center x-bg-white  x-border x-border-slate-300 ' onClick={() => { inputChangeHandler({ target: { value: '自动化节点' } }) }}>
-        自动化节点
+    useEffect(() => {
+        updateRect()
+    }, [data?.inputTypes, data?.outputTypes])
+
+    useEffect(() => {
+        if (data?.isCanvas && inputRefs.current) {
+            // console.log("inputRefs.current ///////////////////////////", inputRefs.current)
+            if (Array.isArray(inputRefs.current)) {
+                let isLoad = true
+                for (let i = 0; i < inputRefs.current.length; i++) {
+                    if (!inputRefs.current[i]) {
+                        isLoad = false
+                        break;
+                    }
+                }
+                if (isLoad) {
+                    console.log("inputPromiseRef isload")
+                    inputPromiseRef?.resolve?.(true)
+                }
+            }
+        }
+    }, [data?.isCanvas, inputRefs.current])
+    useEffect(() => {
+        if (data?.isCanvas && outputRefs.current) {
+            // console.log("outputRefs.current ///////////////////////////", outputRefs.current)
+            if (Array.isArray(outputRefs.current)) {
+                let isLoad = true
+                for (let i = 0; i < outputRefs.current.length; i++) {
+                    if (!outputRefs.current[i]) {
+                        isLoad = false
+                        break;
+                    }
+                }
+                if (isLoad) {
+                    console.log("outPromiseRef isload")
+                    outPromiseRef?.resolve?.(true)
+                }
+            }
+        }
+    }, [data?.isCanvas, outputRefs.current])
+    if (!data) return <>未知节点</>
+    if ((!data?.isCanvas && !data?.isDrag)) return <div className='x-select-none x-w-full x-h-full x-flex x-items-center x-justify-center x-bg-white x-rounded-md x-border-slate-300  x-shadow-md ' onClick={() => { inputChangeHandler({ target: { value: '自动化节点' } }) }}>
+        {data.label || '未知节点'}
     </div>
 
     return <>
-        <div className={` x-w-full x-bg-white x-flex x-flex-col x-rounded-md  x-border x-border-slate-300  x-shadow-md x-outline-blue-500 x-text-base  ${data.selected ? 'x-outline  x-outline-1' : ''}`}>
-            <div className='x-h-10 x-flex x-items-center x-justify-center x-text-slate-500'>
-                <input className='x-w-full' value={data.label || '自动化节点'} onChange={inputChangeHandler} ></input>
+        <div ref={containerRef} className={` x-p-3  x-w-full x-bg-white x-flex x-flex-col x-rounded-md  x-border x-border-slate-300  x-shadow-lg x-outline-blue-500 x-text-sm  ${data.selected ? 'x-outline  x-outline-2' : ''}`}>
+            <div className=' x-flex x-flex-col  x-gap-1 x-mb-5'>
+                <div className='x-flex x-items-center x-text-gray-900 x-text-base'>
+                    <div className='x-flex-1'> {data.label || '未知节点'}</div>
+                    <SvgMore className=" x-w-4 x-h-4 " />
+                </div>
+                <div className='x-text-gray-500'>{data.description || '自动化节点描述'}</div>
             </div>
-            <div className='x-px-2 x-flex x-flex-col x-gap-y-2 x-py-2'>
-                <div className='x-flex x-flex-col x-cursor-pointer '>
-                    <div className=' x-bg-gray-50 x-rounded-md x-px-2 x-flow x-gap-y-2 x-text-sm '>
-                        <div className='x-h-8 x-flex x-items-center -x-mx-2 x-border-b x-px-2 '>inputs</div>
-                        <div className=' x-flex x-items-center x-border-b x-border-gray-100 x-text-gray-500 x-h-6 '>sdfsdfsd f 1</div>
-                        <div className=' x-flex x-items-center x-border-b x-border-gray-100 x-text-gray-500 x-h-6 '>sdfsdfsd f 1</div>
-                        <div className=' x-flex x-items-center x-border-b x-border-gray-100 x-text-gray-500 x-h-6 '>sdfsdfsd f 1</div>
-                        <div className=' x-flex x-items-center x-border-b x-border-gray-100 x-text-gray-500 x-h-6 '>sdfsdfsd f 1</div>
-                        <div className=' x-flex x-items-center x-border-b x-border-gray-100 x-text-gray-500 x-h-6 '>sdfsdfsd f 1</div>
-                        <div className=' x-flex x-items-center x-border-b x-border-gray-100 x-text-gray-500 x-h-6 '>sdfsdfsd f 1</div>
-                        <div className=' x-flex x-items-center x-border-b x-border-gray-100 x-text-gray-500 x-h-6 '>sdfsdfsd f 1</div>
-                        <div className=' x-flex x-items-center x-border-b x-border-gray-100 x-text-gray-500 x-h-6 '>sdfsdfsd f 1</div>
-                        <div className=' x-flex x-items-center x-border-b x-border-gray-100 x-text-gray-500 x-h-6 '>sdfsdfsd f 1</div>
-                        <div className=' x-flex x-items-center x-border-b x-border-gray-100 x-text-gray-500 x-h-6 '>sdfsdfsd f 1</div>
+            <div className='x-flex x-flex-col x-gap-y-2 x-cursor-pointer '>
+                {data?.inputTypes && Array.isArray(data.inputTypes) && data.inputTypes.length > 0 &&
+                    <div className=' x-bg-gray-50 x-rounded-md x-p-3 x-flex x-flex-col'>
+                        <div className='x-h-6 x-flex x-items-center x-font-bold x-text-gray-900 x-mb-4'>输入</div>
+                        <div className='x-flex x-flex-col x-gap-y-2'>
+                            {data?.inputTypes.map((item, index) => {
+                                console.log("item", item)
+                                const SetterComponent = getSetter(item.setter);
+                                let setterProps = {}
+                                if (!SetterComponent) return null;
+                                if (typeof item.setter == 'object') {
+                                    setterProps = item.setter.props || {}
+                                }
+                                return <div className='x-flex x-flex-col  x-gap-2' key={`input-${index}`} ref={el => inputRefs.current[index] = el}>
+                                    <div className=' x-overflow-hidden x-flex x-items-center x-gap-x-1'>
+                                        <div title={item.label} className='x-whitespace-nowrap x-overflow-hidden x-text-ellipsis x-max-w-xs'>{item.label}</div>
+                                        <div className='x-px-2 x-py-1 x-text-xs x-rounded x-bg-gray-200'>{item.column_type}</div>
+                                        {item.required && <div className=' x-text-red-500'>*</div>}
+                                    </div>
+                                    <div className='x-flex-1 x-overflow-hidden'>
+                                        <SetterComponent {...setterProps} refInputs={data.refInputs} onChangeOutputTypes={handleChangeOutputTypes} key={`${item.id}-${index}`} onChange={(value: any) => {
+                                            handInputSettleChange(item.id, value)
+                                        }} value={typeof data.inputSettles?.[item.id] == "undefined" ? item.default_value : data.inputSettles?.[item.id]} />
+                                    </div>
+                                </div>
+                            })}
+
+                        </div>
                     </div>
-                </div>
-                <div className='x-flex x-flex-col x-cursor-pointer '>
-                    <div className=' x-bg-gray-50 x-rounded-md x-px-2 x-gap-y-2 '>
-                        <div className='x-h-8 x-flex x-items-center  x-text-ms '>outputs</div>
-                        <div className=' x-flex x-items-center x-border-b '>sdfsdfsd f 1</div>
-                        <div className=' x-flex x-items-center x-border-b '>sdfsdfsd f2</div>
-                        <div className=' x-flex x-items-center x-border-b '>sdfsdfsd f3</div>
-                        <div className=' x-flex x-items-center x-border-b '>sdfsdfsd f4</div>
-                        <div className=' x-flex x-items-center x-border-b '>sdfsdfsd f5</div>
-                        <div className=' x-flex x-items-center x-border-b '>sdfsdfsd f6</div>
+                }
+                {data?.outputTypes && Array.isArray(data.outputTypes) && data.outputTypes.length > 0 &&
+                    <div className=' x-bg-gray-50 x-rounded-md x-p-3 x-flex x-flex-col x-select-none '>
+                        <div className='x-h-6 x-flex x-items-center x-font-bold x-text-gray-900 x-mb-4'>输出</div>
+                        <div className='x-flex x-flex-col x-gap-y-2'>
+                            {data?.outputTypes.map((item, index) => {
+                                return <div className='x-flex x-items-center  x-gap-x-1' key={`output-${index}`} ref={el => outputRefs.current[index] = el}>
+                                    {item.label}<div className='x-px-2 x-py-1 x-text-xs x-rounded x-bg-gray-200'>{item.column_type}</div>
+                                </div>
+                            })}
+
+                        </div>
                     </div>
-                </div>
+                }
             </div>
         </div>
     </>

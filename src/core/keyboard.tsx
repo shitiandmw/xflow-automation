@@ -1,4 +1,4 @@
-import { useGraphEvent, useGraphStore, useGraphInstance } from '@antv/xflow';
+import { useGraphEvent, useGraphStore, useGraphInstance, } from '@antv/xflow';
 import { useKeyboard, useHistory, useClipboard } from '@antv/xflow';
 import { useCallback, useEffect } from 'react';
 import React, { forwardRef } from 'react';
@@ -13,6 +13,7 @@ const Keyboard = forwardRef(({ mode = "desgin" }: KeyboardProps, ref) => {
   const { copy, paste, cut } = useClipboard();
   const { undo, redo } = useHistory();
   const graph = useGraphInstance();
+
   useEffect(() => {
     console.log("graph edit", graph)
   }, [graph])
@@ -122,6 +123,7 @@ const Keyboard = forwardRef(({ mode = "desgin" }: KeyboardProps, ref) => {
 
   // 同时删除与节点相关的连接线
   useGraphEvent('node:removed', ({ node }) => {
+    console.log('node:removed', node);
     const edgesToRemove = edges.filter((edge: any) => {
       return edge.target.cell == node.id || edge.source.cell == node.id
     });
@@ -130,6 +132,11 @@ const Keyboard = forwardRef(({ mode = "desgin" }: KeyboardProps, ref) => {
 
 
   useGraphEvent('node:selected', ({ node }) => {
+    node.toFront();
+    // graph?.getEdges().forEach((edge) => {
+    //   if(edge?.target?.cell == node.id || edge?.source?.cell == node.id)
+    //   edge.toFront()
+    // })
     console.log('node:selected', node);
     const nodeCopy = {
       id: node.id,
@@ -138,12 +145,10 @@ const Keyboard = forwardRef(({ mode = "desgin" }: KeyboardProps, ref) => {
         selected: true,
       },
     }
-    updateNode(node.id!, {
-      data: nodeCopy.data
-    });
+    updateNode(node.id!, { data: nodeCopy.data })
   });
   useGraphEvent('node:unselected', ({ node }) => {
-    
+
     updateNode(node.id!, {
       data: {
         ...node.data,
@@ -154,8 +159,14 @@ const Keyboard = forwardRef(({ mode = "desgin" }: KeyboardProps, ref) => {
   useGraphEvent('node:change:data', ({ node }) => {
     console.log('node:change:data', node.data);
   })
-  useGraphEvent('node:added', ({ node}) => {
+  useGraphEvent('node:added', ({ node }) => {
     console.log('node:added', node.data);
+    // if (node.data.group== "trigger" &&  nodes.findIndex((item) => {
+    //   return item.data.group == "trigger"
+    // }) >= 0) {
+    //   node.remove();
+    // }
+    // else 
     updateNode(node.id!, {
       data: {
         ...node.data,
@@ -168,19 +179,39 @@ const Keyboard = forwardRef(({ mode = "desgin" }: KeyboardProps, ref) => {
     if (isNew) {
       const sourcePortId = edge.getSourcePortId();
       const targetPortId = edge.getTargetPortId();
-
       const sourceCell = edge.getSourceCell() as any;
       const targetCell = edge.getTargetCell() as any;
-
       const sourcePort = sourceCell!.port.ports.find((port: any) => port.id === sourcePortId)
       const targetPort = targetCell!.port.ports.find((port: any) => port.id === targetPortId)
 
-      console.log("sourcePort", sourcePort)
+      // console.log("sourcePort", sourcePort)
+      // console.log("targetPort", targetPort)
 
-      console.log("targetPort", targetPort)
-
-      if (!sourcePort || !targetPort || sourcePort.type !== 'output' || targetPort.type !== 'input' || sourcePort.datatype != targetPort.datatype) {
+      if (!sourcePort || !targetPort || sourcePort.type !== 'output' || targetPort.type !== 'input') {
         edge.remove();
+      }
+      // 注入source节点的输出字段到target节点
+      else {
+        // if(sourcePort.is_point) return 
+        // console.log("sourceCell",sourceCell)
+        // console.log("targetCell",targetCell)
+        const sourceNode = nodes.find((item) => item.id === sourceCell.id)
+        const targetNode = nodes.find((item) => item.id === targetCell.id)
+        if (sourceNode && targetNode) {
+          let refInputs = targetNode.data.refInputs||{}
+          refInputs = {...refInputs}
+          refInputs[`node_${sourceNode.id||""}`] = {
+            label:sourceNode?.data?.label,
+            id:sourceNode?.data?.id,
+            outputTypes:sourceNode?.data?.outputTypes,
+          }
+          updateNode(targetNode.id||"", {
+            data: {
+              ...targetNode.data,
+              refInputs:refInputs
+            }
+          })
+        }
       }
     }
   })
@@ -200,13 +231,11 @@ const Keyboard = forwardRef(({ mode = "desgin" }: KeyboardProps, ref) => {
     },
   }), [graph]);
 
-  const handleUpdateNode = (id: string, data: any, options:any) => {
-    console.log("begin *///////////*",data)
-    updateNode(id,data,options)
+  const handleUpdateNode = (id: string, data: any, options: any) => {
+    updateNode(id, data, options)
   }
 
   React.useEffect(() => {
-    console.log("init keyborad ////////////////")
     eventEmitter.on('updateNode', handleUpdateNode)
     return () => {
       eventEmitter.off('updateNode', handleUpdateNode)

@@ -1,7 +1,7 @@
 {
   "name": "xflow-automation",
-  "version": "0.0.1",
-  "description": "**XFlow Automation** 是基于 [XFlow](https://github.com/antvis/XFlow) 的扩展项目，旨在简化流程图编辑器的开发，提高开发效率。它提供了简单易用的 API，可以自定义节点、连接线、流程图属性和节点设置器等。",
+  "version": "0.0.2",
+  "description": "**XFlow Automation** 是基于 [XFlow](https://github.com/antvis/XFlow) 的扩展项目，参考了comfyui的自动化流程编辑方式，旨在简化自动化流程的开发，提升开发效率。",
   "main": "dist/index.cjs.js",
   "module": "dist/index.es.js",
   "repository": {
@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@antv/xflow": "^2.1.6",
+    "ahooks": "^3.8.1",
     "eventemitter3": "^5.0.1",
     "less": "^4.2.0",
     "lodash": "^4.17.21",
@@ -32,6 +33,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.7",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.13.1",
