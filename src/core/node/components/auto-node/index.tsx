@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import React, { useImperativeHandle } from 'react';
 import mata from './meta'
-import { NodeRef } from '../../../types'
 import { eventEmitter } from '../../../events';
 // import { debounce } from 'lodash';
 export interface AutoNodeProps {
@@ -11,18 +10,37 @@ export interface AutoNodeProps {
     isCanvas?: boolean;
     selected?: boolean;
     label?: string;
-    updateNodeData: (data: any) => void,
     inputs: any[],
     outputs: any[],
-    node: any,
 }
+// 输出参数类型结构
+const outputTypes = [
+    { label: "用户名称", id: "user_name", column_type: "String", required: false, component_name: "Field.Input" },
+    {
+        label: "所属部门", id: "user_depts", column_type: "Array<User>", required: false, component_name: "Field.Input", children: [
+            { label: "部门id", id: "dept_id", column_type: "Number", required: false, component_name: "Field.Input" },
+            { label: "部门名称", id: "dept_name", column_type: "String", required: false, component_name: "Field.Input" },
+        ]
+    },
+]
+const inputTypes = [
+    {
+        label: "用户名称", id: "user_name", column_type: "String", required: false, component_name: "Field.Input", setter: {
+            name: "StringSetter",
+            props: {}
+        }
+    },
+]
 
+const AutoNode = (props: any) => {
 
-const AutoNode = (props:any) => {
-    const [data,setData] = useState<AutoNodeProps>()
-    useEffect(()=>{
-        typeof props.node?.getData === 'function' && setData(props.node.getData())
-    },[props])
+    
+    const [data, setData] = useState<AutoNodeProps>()
+    useEffect(() => {
+        const nodeData = props.node.getData()
+        nodeData.input
+        typeof props.node?.getData === 'function' && setData(nodeData)
+    }, [props])
 
     // useEffect(()=>{
     //     if (props.isCanvas) {
@@ -32,8 +50,8 @@ const AutoNode = (props:any) => {
 
 
     const inputChangeHandler = (e: any) => {
-        const data = props.node.getData()
-        console.log("data",data)
+        // const data = props.node.getData()
+        // console.log("data", data)
         props.node.setData({ ...data, label: e.target.value })
 
     };
@@ -51,7 +69,7 @@ const AutoNode = (props:any) => {
     useEffect(() => {
         if (data && data?.isCanvas) {
             eventEmitter.emit('updateNode', data.id, {
-                width:300,
+                width: 300,
                 ports: {
                     items: [
                         {
@@ -114,7 +132,7 @@ const AutoNode = (props:any) => {
         }
     }, [data])
 
-    if (!data || !data?.isCanvas) return <div className='x-w-full x-h-full x-flex x-items-center x-justify-center x-bg-white  x-border x-border-slate-300 ' onClick={()=>{ inputChangeHandler({target:{value:'自动化节点'}})}}>
+    if (!data || !data?.isCanvas) return <div className='x-w-full x-h-full x-flex x-items-center x-justify-center x-bg-white  x-border x-border-slate-300 ' onClick={() => { inputChangeHandler({ target: { value: '自动化节点' } }) }}>
         自动化节点
     </div>
 
