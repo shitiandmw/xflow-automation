@@ -25,7 +25,11 @@ const AutoNode = (props: any) => {
     }, []);
     useEffect(() => {
         if (typeof props.node?.getData === 'function') {
-            const nodeData = props.node.getData()
+            const nodeData = props.node.getData() as NodeRegistryProps
+            if (!nodeData.scale) nodeData.scale = {
+                "sx": 1,
+                "sy": 1,
+            }
             if (isEqual(nodeData, data)) return
             setData(nodeData)
         }
@@ -51,7 +55,7 @@ const AutoNode = (props: any) => {
                     if (ref) {
                         const rect = ref.getBoundingClientRect()
                         let x = width
-                        let y = rect?.y - parent_rect!?.y + rect?.height / 2;
+                        let y = (rect?.y - parent_rect!?.y + rect?.height / 2) / (data.scale?.sy || 1);
                         ports_items.push({
                             id: data.outputTypes[i].id,
                             group: 'custom_output',
@@ -76,7 +80,8 @@ const AutoNode = (props: any) => {
         setTimeout(() => {
             let width = data.width || 500
             const rect = containerRef.current?.getBoundingClientRect();
-            const height = rect?.height || 300
+            const height = (rect?.height || 300) / (data.scale?.sy || 1)
+
             const nodeRect = {
                 width: width,
                 height: height,

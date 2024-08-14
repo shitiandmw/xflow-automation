@@ -13,7 +13,6 @@ const Keyboard = forwardRef(({ mode = "desgin" }: KeyboardProps, ref) => {
   const { copy, paste, cut } = useClipboard();
   const { undo, redo } = useHistory();
   const graph = useGraphInstance();
-
   useEffect(() => {
     console.log("graph edit", graph)
   }, [graph])
@@ -130,118 +129,127 @@ const Keyboard = forwardRef(({ mode = "desgin" }: KeyboardProps, ref) => {
     removeEdges(edgesToRemove.map((edge) => edge.id));
   })
 
-
-  useGraphEvent('node:selected', ({ node }) => {
-    node.toFront();
-    // graph?.getEdges().forEach((edge) => {
-    //   if(edge?.target?.cell == node.id || edge?.source?.cell == node.id)
-    //   edge.toFront()
-    // })
-    console.log('node:selected', node);
-    const nodeCopy = {
-      id: node.id,
-      data: {
-        ...node.data,
-        selected: true,
-      },
-    }
-    updateNode(node.id!, { data: nodeCopy.data })
-  });
-  useGraphEvent('node:unselected', ({ node }) => {
-
-    updateNode(node.id!, {
-      data: {
-        ...node.data,
-        selected: false,
-      }
-    });
-  });
-  useGraphEvent('node:change:data', ({ node }) => {
-    console.log('node:change:data', node.data);
-  })
-  useGraphEvent('node:added', ({ node }) => {
-    console.log('node:added', node.data);
-    // if (node.data.group== "trigger" &&  nodes.findIndex((item) => {
-    //   return item.data.group == "trigger"
-    // }) >= 0) {
-    //   node.remove();
-    // }
-    // else 
-    updateNode(node.id!, {
-      data: {
-        ...node.data,
-        isDrag: false,
-        isCanvas: true,
-      }
+  useGraphEvent('scale', (args) => {
+    nodes.forEach((node) => {
+      updateNode(node.id || "", {
+        data: {
+          ...node.data,
+          scale: args,
+        },
+      })
     })
   })
-  useGraphEvent('edge:connected', ({ edge, isNew }) => {
-    if (isNew) {
-      const sourcePortId = edge.getSourcePortId();
-      const targetPortId = edge.getTargetPortId();
-      const sourceCell = edge.getSourceCell() as any;
-      const targetCell = edge.getTargetCell() as any;
-      const sourcePort = sourceCell!.port.ports.find((port: any) => port.id === sourcePortId)
-      const targetPort = targetCell!.port.ports.find((port: any) => port.id === targetPortId)
 
-      // console.log("sourcePort", sourcePort)
-      // console.log("targetPort", targetPort)
-
-      if (!sourcePort || !targetPort || sourcePort.type !== 'output' || targetPort.type !== 'input') {
-        edge.remove();
+    useGraphEvent('node:selected', ({ node }) => {
+      node.toFront();
+      // graph?.getEdges().forEach((edge) => {
+      //   if(edge?.target?.cell == node.id || edge?.source?.cell == node.id)
+      //   edge.toFront()
+      // })
+      console.log('node:selected', node);
+      const nodeCopy = {
+        id: node.id,
+        data: {
+          ...node.data,
+          selected: true,
+        },
       }
-      // 注入source节点的输出字段到target节点
-      else {
-        // if(sourcePort.is_point) return 
-        // console.log("sourceCell",sourceCell)
-        // console.log("targetCell",targetCell)
-        const sourceNode = nodes.find((item) => item.id === sourceCell.id)
-        const targetNode = nodes.find((item) => item.id === targetCell.id)
-        if (sourceNode && targetNode) {
-          let refInputs = targetNode.data.refInputs||{}
-          refInputs = {...refInputs}
-          refInputs[`node_${sourceNode.id||""}`] = {
-            label:sourceNode?.data?.label,
-            id:sourceNode?.data?.id,
-            outputTypes:sourceNode?.data?.outputTypes,
-          }
-          updateNode(targetNode.id||"", {
-            data: {
-              ...targetNode.data,
-              refInputs:refInputs
+      updateNode(node.id!, { data: nodeCopy.data })
+    });
+    useGraphEvent('node:unselected', ({ node }) => {
+      updateNode(node.id!, {
+        data: {
+          ...node.data,
+          selected: false,
+        }
+      });
+    });
+    useGraphEvent('node:change:data', ({ node }) => {
+      console.log('node:change:data', node.data);
+    })
+    useGraphEvent('node:added', ({ node }) => {
+      console.log('node:added', node.data);
+      // if (node.data.group== "trigger" &&  nodes.findIndex((item) => {
+      //   return item.data.group == "trigger"
+      // }) >= 0) {
+      //   node.remove();
+      // }
+      // else 
+      updateNode(node.id!, {
+        data: {
+          ...node.data,
+          isDrag: false,
+          isCanvas: true,
+        }
+      })
+    })
+    useGraphEvent('edge:connected', ({ edge, isNew }) => {
+      if (isNew) {
+        const sourcePortId = edge.getSourcePortId();
+        const targetPortId = edge.getTargetPortId();
+        const sourceCell = edge.getSourceCell() as any;
+        const targetCell = edge.getTargetCell() as any;
+        const sourcePort = sourceCell!.port.ports.find((port: any) => port.id === sourcePortId)
+        const targetPort = targetCell!.port.ports.find((port: any) => port.id === targetPortId)
+
+        // console.log("sourcePort", sourcePort)
+        // console.log("targetPort", targetPort)
+
+        if (!sourcePort || !targetPort || sourcePort.type !== 'output' || targetPort.type !== 'input') {
+          edge.remove();
+        }
+        // 注入source节点的输出字段到target节点
+        else {
+          // if(sourcePort.is_point) return 
+          // console.log("sourceCell",sourceCell)
+          // console.log("targetCell",targetCell)
+          const sourceNode = nodes.find((item) => item.id === sourceCell.id)
+          const targetNode = nodes.find((item) => item.id === targetCell.id)
+          if (sourceNode && targetNode) {
+            let refInputs = targetNode.data.refInputs || {}
+            refInputs = { ...refInputs }
+            refInputs[`node_${sourceNode.id || ""}`] = {
+              label: sourceNode?.data?.label,
+              id: sourceNode?.data?.id,
+              outputTypes: sourceNode?.data?.outputTypes,
             }
-          })
+            updateNode(targetNode.id || "", {
+              data: {
+                ...targetNode.data,
+                refInputs: refInputs
+              }
+            })
+          }
         }
       }
+    })
+    React.useEffect(() => {
+      setFlowDataByName("nodes", nodes);
+    }, [nodes]);
+    React.useEffect(() => {
+      setFlowDataByName("edges", edges);
+    }, [edges]);
+
+    React.useImperativeHandle(ref, () => ({
+      setFlowData: (data: FLowMetaData) => {
+        initData({ nodes: data?.nodes || [], edges: data.edges || [] })
+        setTimeout(() => {
+          graph?.zoomToFit({ maxScale: 1 });
+        }, 0);
+      },
+    }), [graph]);
+
+    const handleUpdateNode = (id: string, data: any, options: any) => {
+      updateNode(id, data, options)
     }
-  })
-  React.useEffect(() => {
-    setFlowDataByName("nodes", nodes);
-  }, [nodes]);
-  React.useEffect(() => {
-    setFlowDataByName("edges", edges);
-  }, [edges]);
 
-  React.useImperativeHandle(ref, () => ({
-    setFlowData: (data: FLowMetaData) => {
-      initData({ nodes: data?.nodes || [], edges: data.edges || [] })
-      setTimeout(() => {
-        graph?.zoomToFit({ maxScale: 1 });
-      }, 0);
-    },
-  }), [graph]);
+    React.useEffect(() => {
+      eventEmitter.on('updateNode', handleUpdateNode)
+      return () => {
+        eventEmitter.off('updateNode', handleUpdateNode)
+      }
+    }, []);
+    return null;
+  });
 
-  const handleUpdateNode = (id: string, data: any, options: any) => {
-    updateNode(id, data, options)
-  }
-
-  React.useEffect(() => {
-    eventEmitter.on('updateNode', handleUpdateNode)
-    return () => {
-      eventEmitter.off('updateNode', handleUpdateNode)
-    }
-  }, []);
-  return null;
-});
-
-export { Keyboard };
+  export { Keyboard };

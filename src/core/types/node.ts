@@ -10,7 +10,7 @@ export interface Node {
     name: string;
     meta: NodeMeta,
     component: React.FC<any>;
-    warpper:React.FC<any>;
+    warpper: React.FC<any>;
     props: any;
 }
 
@@ -31,7 +31,7 @@ export interface NodeRef {
         width: number;
         height: number;
     }
-} 
+}
 
 
 
@@ -51,8 +51,12 @@ export interface MetaColumn {
     is_point: boolean,
 }
 
+export interface NodeScale{
+    "sx": number,
+    "sy": number,
+}
 export interface MetaRefInput {
-    [name:string]: NodeRegistryProps
+    [name: string]: NodeRegistryProps
 }
 export interface NodeRegistryProps {
     id?: string;
@@ -62,12 +66,13 @@ export interface NodeRegistryProps {
     width?: number;
     height?: number;
     label?: string;
-    group:string;
-    shape:string,
-    type:string;
+    group: string;
+    shape: string,
+    type: string;
     description?: string;
     inputTypes?: MetaColumn[] | null,  // 输入参数类型结构
     inputSettles?: any,
     outputTypes?: MetaColumn[] | null, // 输出参数类型结构
-    refInputs?: MetaRefInput | null,  // 可用的引用参数
+    refInputs?: MetaRefInput ,  // 可用的引用参数
+    scale?: NodeScale 
 }

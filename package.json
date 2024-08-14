@@ -1,6 +1,6 @@
 {
   "name": "xflow-automation",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "**XFlow Automation** 是基于 [XFlow](https://github.com/antvis/XFlow) 的扩展项目，参考了comfyui的自动化流程编辑方式，旨在简化自动化流程的开发，提升开发效率。",
   "main": "dist/index.cjs.js",
   "module": "dist/index.es.js",

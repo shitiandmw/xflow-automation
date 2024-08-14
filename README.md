@@ -15,7 +15,7 @@
 
 ## 视频演示
 
-[![视频演示](./doc/image/video-start.jpg)](https://github.com/shitiandmw/xflow-extend/assets/130025975/781febe2-d45a-4813-b8ab-666ad5f08723)
+[![视频演示](./doc/image/video-start.png)](https://github.com/user-attachments/assets/fdf159e7-03c2-4fda-b9a4-ac06f0b771d3)
 
 ## 快速开始
 
