@@ -1,22 +1,23 @@
 import { useDnd, useGraphInstance } from '@antv/xflow';
 import { nanoid } from 'nanoid'
 import React, { useEffect, useState } from "react";
-import { NodeRegistryProps,NodeScale } from "./types";
+import { NodeRegistryProps, NodeScale } from "./types";
 import { getNodes } from "./node";
 import { AutoNode } from './node';
+import { eventEmitter } from './events';
 
 
 const Panel = () => {
     const [nodes, setNodes] = useState<Array<NodeRegistryProps>>([]);
     const { startDrag } = useDnd();
     const graph = useGraphInstance();
-    
+
     const handleMouseDown = (e: React.MouseEvent<Element, MouseEvent>, node: NodeRegistryProps) => {
         const scale = graph?.scale()
         const id = nanoid()
         let data = node
         data.id = id
-        data.scale = (scale as NodeScale ) || { sx: 1, sy: 1 }
+        data.scale = (scale as NodeScale) || { sx: 1, sy: 1 }
         // data.props = node.meta.props
         data.isDrag = true
         let width = data.width || 500
@@ -44,15 +45,24 @@ const Panel = () => {
             e,
         );
     }
-
-    useEffect(() => {
+    const initPanelNodes = () => {
         const nodes_ = []
         const nodeMaps = getNodes()
         for (const key in nodeMaps) {
             nodes_.push(nodeMaps[key])
         }
         setNodes(nodes_)
+    }
+
+    useEffect(() => {
+        initPanelNodes();
+        eventEmitter.on('node.registry.changed', initPanelNodes);
+        return () => {
+            eventEmitter.off('node.registry.changed', initPanelNodes);
+        }
     }, [])
+
+
 
     return <div className="x-w-full x-h-full x-box-border x-p-3 x-flex x-flex-col x-gap-y-2">
         {nodes.map(node => {

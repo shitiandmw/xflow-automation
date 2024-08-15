@@ -1,4 +1,5 @@
 import './index.css'
-import { default as XFlowExtend} from './core'
-export default XFlowExtend
+import { default as XFlowAutomation } from './core'
+
+export default XFlowAutomation
 export * from './core'

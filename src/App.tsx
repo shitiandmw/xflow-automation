@@ -6,9 +6,6 @@ import React, { useEffect } from 'react';
 
 import { nodeProps } from './nodeDatas';
 
-nodeProps.forEach(nodeProp => {
-  registerNodeProps(nodeProp)
-})
 
 // 注册自定义的设置器
 registerSetter("StringSetter", StringSetter)
@@ -50,6 +47,10 @@ const App = () => {
     setMode(mode === 'view' ? 'desgin' : 'view')
   }
   useEffect(() => {
+    // 测试延迟注册节点（模拟后端获取数据）
+    setTimeout(() => {
+      registerNodeProps(nodeProps)
+    }, 1000);
     registerDataChangeHandler(handleFLowDataChange)
     return () => {
       unregisterDataChangeHandler(handleFLowDataChange)

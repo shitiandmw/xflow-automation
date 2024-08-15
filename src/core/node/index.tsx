@@ -1,2 +1,2 @@
 export * from "./components";
-export * from "./nodeRegistry"
+export * from "./nodeRegistry";

@@ -3,7 +3,7 @@
 // import ports from "./ports";
 // import { NodeWarpper } from "./components"
 import { NodeRegistryProps } from "../types"
-
+import {eventEmitter} from "../events"
 // setterRegistry.js
 
 const nodeRegistry: { [name: string]: NodeRegistryProps } = {};
@@ -19,8 +19,14 @@ export function clearNode() {
         delete nodeRegistry[key];
     });
 }
-export function registerNodeProps(node :NodeRegistryProps) {
+export function registerNodeProp(node :NodeRegistryProps) {
     nodeRegistry[node.type] = node;
+}
+export function registerNodeProps(nodes: NodeRegistryProps[]) {
+    nodes.forEach(node => {
+        nodeRegistry[node.type] = node;
+    });
+    eventEmitter.emit("node.registry.changed", nodeRegistry);
 }
 
 export function getNode(name: string): NodeRegistryProps {

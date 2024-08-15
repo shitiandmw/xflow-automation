@@ -8,7 +8,293 @@ export const nodeProps =[
         "label": "数据变化触发器",
         "description": "当选择的表单发生数据变更时，触发此流程",
         "outputTypes": [
-
+            {
+                "id": "condition",
+                "component_name": "",
+                "label": "条件",
+                "column_type": "Array\u003cObject\u003e",
+                "required": true,
+                "children": [
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    },
+                    {
+                        "id": "condition",
+                        "component_name": "",
+                        "label": "条件",
+                        "column_type": "Array\u003cObject\u003e",
+                        "required": true,
+                        "children": null,
+                        "setter": {
+                            "name": "StringSetter",
+                            "props": null
+                        },
+                        "is_point": false
+                    }
+                ],
+                "setter": {
+                    "name": "StringSetter",
+                    "props": null
+                },
+                "is_point": false
+            }
         ],
         "inputTypes": [
             {

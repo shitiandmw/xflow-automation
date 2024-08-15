@@ -9,7 +9,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: 'src/build.tsx', // 入口文件
-      name: 'XFlowExtend',
+      name: 'XFlowAutomation',
       formats: ['es', 'cjs'], // 指定生成的模块格式
       fileName: (format) => `index.${format}.js`,
     },

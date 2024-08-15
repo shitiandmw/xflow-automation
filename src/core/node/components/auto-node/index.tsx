@@ -1,22 +1,37 @@
 
-import { useEffect, useState } from 'react';
-import React, {  } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import React, { } from 'react';
 import mata from './meta'
 import { eventEmitter } from '../../../events';
 import SvgMore from "./svg-more"
 import { isEqual } from "lodash"
-import { NodeRegistryProps,MetaColumn } from "../../../types"
+import { NodeRegistryProps, MetaColumn } from "../../../types"
 import { useCreation } from 'ahooks';
 import { getSetter } from "../../../setter/setterRegistry";
 
 import { createPromiseWrapper } from "../../../utils"
 
+const OutputRow = ({ item }: { item: MetaColumn }) => {
+    return <div className='x-flex x-flex-col x-gap-y-2'>
+        <div className='x-flex x-items-center  x-gap-x-1'  >
+            {item.label}<div className='x-px-2 x-py-1 x-text-xs x-rounded x-bg-gray-200'>{item.column_type}</div>
+           
+        </div> {item.children && item.children.length > 0 && <div className='x-pl-6 x-flex x-flex-col x-gap-y-2'>
+                {item.children.map((child, index) => <OutputRow key={`output-child-${index}-${child.id}`} item={child} />)}
+            </div>}
+    </div>
+}
 
 const AutoNode = (props: any) => {
     const containerRef = React.useRef<HTMLDivElement | null>(null);
     const inputRefs = React.useRef<Array<HTMLDivElement | null>>([]);
     const outputRefs = React.useRef<Array<HTMLDivElement | null>>([]);
-    const [data, setData] = useState<NodeRegistryProps>()
+    const [data, updData] = useState<NodeRegistryProps>()
+    const dataRef = useRef<NodeRegistryProps>();
+    const setData = (data: NodeRegistryProps) => {
+        dataRef.current = data
+        updData(data)
+    }
     const inputPromiseRef = useCreation(() => {
         return createPromiseWrapper();
     }, []);
@@ -38,7 +53,7 @@ const AutoNode = (props: any) => {
     const inputChangeHandler = (e: any) => {
         // const data = props.node.getData()
         // console.log("data", data)
-        props.node.setData({ ...data, label: e.target.value })
+        props.node.setData({ ...dataRef.current, label: e.target.value })
     };
 
     const computePoints = async () => {
@@ -88,7 +103,7 @@ const AutoNode = (props: any) => {
             }
             eventEmitter.emit('updateNode', data.id, nodeRect)
             computePoints()
-        }, 100);
+        }, 0);
     }
 
     const handInputSettleChange = (propName: string, value: any) => {
@@ -97,10 +112,10 @@ const AutoNode = (props: any) => {
             ...oldInputSettle,
             [propName]: value
         };
-        props.node.setData({ ...data, inputSettles: updatedInputSettle })
+        props.node.setData({ ...dataRef.current, inputSettles: updatedInputSettle })
     }
     const handleChangeOutputTypes = (outputTypes: MetaColumn[]) => {
-        props.node.setData({...data, outputTypes: outputTypes })
+        props.node.setData({ ...dataRef.current, outputTypes: outputTypes })
     }
     // useEffect(() => {
     //     if (data?.isCanvas && containerRef.current) {
@@ -202,11 +217,9 @@ const AutoNode = (props: any) => {
                 {data?.outputTypes && Array.isArray(data.outputTypes) && data.outputTypes.length > 0 &&
                     <div className=' x-bg-gray-50 x-rounded-md x-p-3 x-flex x-flex-col x-select-none '>
                         <div className='x-h-6 x-flex x-items-center x-font-bold x-text-gray-900 x-mb-4'>输出</div>
-                        <div className='x-flex x-flex-col x-gap-y-2'>
+                        <div className='x-flex x-flex-col x-gap-y-2 x-max-h-96 x-overflow-y-auto'>
                             {data?.outputTypes.map((item, index) => {
-                                return <div className='x-flex x-items-center  x-gap-x-1' key={`output-${index}`} ref={el => outputRefs.current[index] = el}>
-                                    {item.label}<div className='x-px-2 x-py-1 x-text-xs x-rounded x-bg-gray-200'>{item.column_type}</div>
-                                </div>
+                                return <div key={`output-${index}`} ref={el => outputRefs.current[index] = el}><OutputRow item={item} /></div>
                             })}
 
                         </div>
