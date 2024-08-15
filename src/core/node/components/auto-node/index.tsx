@@ -12,11 +12,11 @@ import { getSetter } from "../../../setter/setterRegistry";
 import { createPromiseWrapper } from "../../../utils"
 
 const OutputRow = ({ item }: { item: MetaColumn }) => {
-    return <div className='x-flex x-flex-col x-gap-y-2'>
+    return <div className='x-flex x-flex-col x-gap-y-1'>
         <div className='x-flex x-items-center  x-gap-x-1'  >
             {item.label}<div className='x-px-2 x-py-1 x-text-xs x-rounded x-bg-gray-200'>{item.column_type}</div>
            
-        </div> {item.children && item.children.length > 0 && <div className='x-pl-6 x-flex x-flex-col x-gap-y-2'>
+        </div> {item.children && item.children.length > 0 && <div className='x-pl-6 x-flex x-flex-col x-gap-y-1'>
                 {item.children.map((child, index) => <OutputRow key={`output-child-${index}-${child.id}`} item={child} />)}
             </div>}
     </div>
@@ -26,11 +26,13 @@ const AutoNode = (props: any) => {
     const containerRef = React.useRef<HTMLDivElement | null>(null);
     const inputRefs = React.useRef<Array<HTMLDivElement | null>>([]);
     const outputRefs = React.useRef<Array<HTMLDivElement | null>>([]);
-    const [data, updData] = useState<NodeRegistryProps>()
+    const [data, setData] = useState<NodeRegistryProps>()
     const dataRef = useRef<NodeRegistryProps>();
-    const setData = (data: NodeRegistryProps) => {
-        dataRef.current = data
-        updData(data)
+    const nodeSetData = (data: any) => {
+        dataRef.current = data as NodeRegistryProps
+        console.log("nodeSetData /////////////////////////",JSON.parse(JSON.stringify(data)))
+        // props.node.setData({...data})
+        eventEmitter.emit('updateNode', data.id, {data:data})
     }
     const inputPromiseRef = useCreation(() => {
         return createPromiseWrapper();
@@ -53,7 +55,7 @@ const AutoNode = (props: any) => {
     const inputChangeHandler = (e: any) => {
         // const data = props.node.getData()
         // console.log("data", data)
-        props.node.setData({ ...dataRef.current, label: e.target.value })
+        nodeSetData({ ...(dataRef.current || data), label: e.target.value })
     };
 
     const computePoints = async () => {
@@ -112,10 +114,10 @@ const AutoNode = (props: any) => {
             ...oldInputSettle,
             [propName]: value
         };
-        props.node.setData({ ...dataRef.current, inputSettles: updatedInputSettle })
+        nodeSetData({ ...(dataRef.current || data), inputSettles: updatedInputSettle })
     }
     const handleChangeOutputTypes = (outputTypes: MetaColumn[]) => {
-        props.node.setData({ ...dataRef.current, outputTypes: outputTypes })
+        nodeSetData({ ...(dataRef.current || data), outputTypes: outputTypes })
     }
     // useEffect(() => {
     //     if (data?.isCanvas && containerRef.current) {
@@ -197,7 +199,7 @@ const AutoNode = (props: any) => {
                                 if (typeof item.setter == 'object') {
                                     setterProps = item.setter.props || {}
                                 }
-                                return <div className='x-flex x-flex-col  x-gap-2' key={`input-${index}`} ref={el => inputRefs.current[index] = el}>
+                                return <div className='x-flex x-flex-col  x-gap-1' key={`input-${index}`} ref={el => inputRefs.current[index] = el}>
                                     <div className=' x-overflow-hidden x-flex x-items-center x-gap-x-1'>
                                         <div title={item.label} className='x-whitespace-nowrap x-overflow-hidden x-text-ellipsis x-max-w-xs'>{item.label}</div>
                                         <div className='x-px-2 x-py-1 x-text-xs x-rounded x-bg-gray-200'>{item.column_type}</div>
