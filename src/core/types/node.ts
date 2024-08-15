@@ -74,5 +74,6 @@ export interface NodeRegistryProps {
     inputSettles?: any,
     outputTypes?: MetaColumn[] | null, // 输出参数类型结构
     refInputs?: MetaRefInput ,  // 可用的引用参数
-    scale?: NodeScale 
+    scale?: NodeScale ,
+    attachData?: {[name: string]: any}
 }

@@ -118,6 +118,15 @@ const AutoNode = (props: any) => {
     const handleChangeOutputTypes = (outputTypes: MetaColumn[]) => {
         nodeSetData({ ...(dataRef.current || data), outputTypes: outputTypes })
     }
+    const handleChangeAttachData = (name:string, value:any) =>{
+        nodeSetData({
+            ...(dataRef.current || data),
+            attachData: {
+               ...dataRef.current?.attachData,
+                [name]: value
+            }
+        })
+    }
     // useEffect(() => {
     //     if (data?.isCanvas && containerRef.current) {
     //         let width = data.width || 500
@@ -202,7 +211,7 @@ const AutoNode = (props: any) => {
                                         {item.required && <div className=' x-text-red-500'>*</div>}
                                     </div>
                                     <div className='x-flex-1 x-overflow-hidden'>
-                                        <SetterComponent {...setterProps} refInputs={data.refInputs} onChangeOutputTypes={handleChangeOutputTypes} key={`${item.id}-${index}`} onChange={(value: any) => {
+                                        <SetterComponent {...setterProps} refInputs={data.refInputs} attachData={data.attachData} onChangeAttachData={handleChangeAttachData} onChangeOutputTypes={handleChangeOutputTypes} key={`${item.id}-${index}`} onChange={(value: any) => {
                                             handInputSettleChange(item.id, value)
                                         }} value={typeof data.inputSettles?.[item.id] == "undefined" ? item.default_value : data.inputSettles?.[item.id]} />
                                     </div>
