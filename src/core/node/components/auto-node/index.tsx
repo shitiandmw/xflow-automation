@@ -30,7 +30,6 @@ const AutoNode = (props: any) => {
     const dataRef = useRef<NodeRegistryProps>();
     const nodeSetData = (data: any) => {
         dataRef.current = data as NodeRegistryProps
-        console.log("nodeSetData /////////////////////////",JSON.parse(JSON.stringify(data)))
         // props.node.setData({...data})
         eventEmitter.emit('updateNode', data.id, {data:data})
     }
@@ -148,7 +147,6 @@ const AutoNode = (props: any) => {
                     }
                 }
                 if (isLoad) {
-                    console.log("inputPromiseRef isload")
                     inputPromiseRef?.resolve?.(true)
                 }
             }
@@ -166,7 +164,6 @@ const AutoNode = (props: any) => {
                     }
                 }
                 if (isLoad) {
-                    console.log("outPromiseRef isload")
                     outPromiseRef?.resolve?.(true)
                 }
             }
@@ -192,7 +189,6 @@ const AutoNode = (props: any) => {
                         <div className='x-h-6 x-flex x-items-center x-font-bold x-text-gray-900 x-mb-4'>输入</div>
                         <div className='x-flex x-flex-col x-gap-y-2'>
                             {data?.inputTypes.map((item, index) => {
-                                console.log("item", item)
                                 const SetterComponent = getSetter(item.setter);
                                 let setterProps = {}
                                 if (!SetterComponent) return null;
