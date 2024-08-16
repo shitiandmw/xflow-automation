@@ -166,10 +166,9 @@ const Keyboard = forwardRef(({ mode = "desgin" }: KeyboardProps, ref) => {
     current = current as NodeRegistryProps
     const previous = nodeDataRef.current[current.id] || {}
     if (!isEqual(current, previous)) {
+      console.log('node:change:data', current);
       if (!isEqual(current.outputTypes, previous.outputTypes)) {
         // 输出的值出现了变化，更新依赖的节点ref
-        console.log('node:change:data current.outputTypes', current.outputTypes);
-        console.log('node:change:data previous.outputTypes', previous.outputTypes);
         edges.filter((edge: any) => { return edge.source.cell == current.id }).forEach(edge => {
           const targetNode = nodes.find((item) => item.id === (edge?.target as any)?.cell)
           console.log("targetNode", targetNode)
@@ -264,7 +263,7 @@ const Keyboard = forwardRef(({ mode = "desgin" }: KeyboardProps, ref) => {
     console.log("edge:removed", edge)
     const { targetNode, sourceCellId } = getEdgeRelated(edge)
     if (targetNode) {
-      let refInputs = targetNode.data.refInputs || {}
+      let refInputs = targetNode.data.refInputs || []
       refInputs = [...refInputs]
       refInputs = refInputs.filter((item: any) => item.id != sourceCellId)
       setTimeout(() => {

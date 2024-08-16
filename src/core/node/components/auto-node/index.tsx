@@ -48,6 +48,8 @@ const AutoNode = (props: any) => {
             }
             if (isEqual(nodeData, data)) return
             setData(nodeData)
+            if(!isEqual(nodeData, dataRef.current)) 
+                dataRef.current = nodeData
         }
     }, [props])
 
@@ -113,7 +115,9 @@ const AutoNode = (props: any) => {
             ...oldInputSettle,
             [propName]: value
         };
-        nodeSetData({ ...(dataRef.current || data), inputSettles: updatedInputSettle })
+        const changeData = { ...(dataRef.current || data), inputSettles: updatedInputSettle }
+        console.log("handInputSettleChange changeData//////////////", changeData)
+        nodeSetData(changeData)
     }
     const handleChangeOutputTypes = (outputTypes: MetaColumn[]) => {
         nodeSetData({ ...(dataRef.current || data), outputTypes: outputTypes })
@@ -211,7 +215,13 @@ const AutoNode = (props: any) => {
                                         {item.required && <div className=' x-text-red-500'>*</div>}
                                     </div>
                                     <div className='x-flex-1 x-overflow-hidden'>
-                                        <SetterComponent {...setterProps} refInputs={data.refInputs} attachData={data.attachData} onChangeAttachData={handleChangeAttachData} onChangeOutputTypes={handleChangeOutputTypes} key={`${item.id}-${index}`} onChange={(value: any) => {
+                                        <SetterComponent {...setterProps} 
+                                        refInputs={data.refInputs} 
+                                        attachData={data.attachData} 
+                                        onChangeAttachData={handleChangeAttachData} 
+                                        onChangeOutputTypes={handleChangeOutputTypes} 
+                                        key={`${item.id}-${index}`} 
+                                        onChange={(value: any) => {
                                             handInputSettleChange(item.id, value)
                                         }} value={typeof data.inputSettles?.[item.id] == "undefined" ? item.default_value : data.inputSettles?.[item.id]} />
                                     </div>
@@ -224,7 +234,7 @@ const AutoNode = (props: any) => {
                 {data?.outputTypes && Array.isArray(data.outputTypes) && data.outputTypes.length > 0 &&
                     <div className=' x-bg-gray-50 x-rounded-md x-p-3 x-flex x-flex-col x-select-none '>
                         <div className='x-h-6 x-flex x-items-center x-font-bold x-text-gray-900 x-mb-4'>输出</div>
-                        <div className='x-flex x-flex-col x-gap-y-2 x-max-h-96 x-overflow-y-auto'>
+                        <div className='x-flex x-flex-col x-gap-y-1 x-max-h-96 x-overflow-y-auto'>
                             {data?.outputTypes.map((item, index) => {
                                 return <div key={`output-${index}`} ref={el => outputRefs.current[index] = el}><OutputRow item={item} /></div>
                             })}
