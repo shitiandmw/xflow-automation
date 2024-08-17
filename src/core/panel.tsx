@@ -48,6 +48,7 @@ const Panel = () => {
     const initPanelNodes = () => {
         const nodes_ = []
         const nodeMaps = getNodes()
+        console.log("nodeMaps /////////////", nodeMaps)
         for (const key in nodeMaps) {
             nodes_.push(nodeMaps[key])
         }
@@ -66,7 +67,7 @@ const Panel = () => {
 
     return <div className="x-w-full x-h-full x-box-border x-p-3 x-flex x-flex-col x-gap-y-2">
         {nodes.map(node => {
-            return <div className="x-w-full x-h-8" onMouseDown={(e) => handleMouseDown(e, node)} key={node.id}>
+            return <div className="x-w-full x-h-8" onMouseDown={(e) => handleMouseDown(e, node)} key={node.type}>
                 <AutoNode node={{
                     getData: () => {
                         return { label: node.label, }

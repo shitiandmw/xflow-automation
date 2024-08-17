@@ -15,7 +15,7 @@
 
 ## 视频演示
 
-[![视频演示](./doc/image/video-start.png)](https://github.com/user-attachments/assets/fdf159e7-03c2-4fda-b9a4-ac06f0b771d3)
+[![视频演示](./doc/image/video-start.png)](https://github.com/user-attachments/assets/bce4d7d9-27da-4fdf-a8a6-1494c362621d)
 
 ## 快速开始
 
