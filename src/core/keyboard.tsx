@@ -7,6 +7,7 @@ import { FLowMetaData, NodeRegistryProps } from './types';
 import { eventEmitter } from './events';
 import { isEqual, debounce } from 'lodash';
 
+
 export interface KeyboardProps {
   mode?: string;
 }
@@ -162,12 +163,12 @@ const Keyboard = forwardRef(({ mode = "desgin" }: KeyboardProps, ref) => {
     });
   });
   const nodeDataRef = React.useRef<{ [name: string]: NodeRegistryProps }>({});
-  useGraphEvent('node:change:data', debounce(({ current }) => {
+  useGraphEvent('node:change:data', ({ current }) => {
     current = current as NodeRegistryProps
     const previous = nodeDataRef.current[current.id] || {}
     if (!isEqual(current, previous)) {
       console.log('node:change:data', current);
-      if (!isEqual(current.outputTypes, previous.outputTypes)) {
+      if (!isEqual(current.outputTypes, previous.outputTypes) || !isEqual(current.label, previous.label)) {
         // 输出的值出现了变化，更新依赖的节点ref
         edges.filter((edge: any) => { return edge.source.cell == current.id }).forEach(edge => {
           const targetNode = nodes.find((item) => item.id === (edge?.target as any)?.cell)
@@ -192,7 +193,7 @@ const Keyboard = forwardRef(({ mode = "desgin" }: KeyboardProps, ref) => {
 
       nodeDataRef.current[current.id] = current
     }
-  }, 300))
+  })
   useGraphEvent('node:added', ({ node }) => {
     console.log('node:added', node.data);
     // if (node.data.group== "trigger" &&  nodes.findIndex((item) => {

@@ -4,23 +4,30 @@ import React, { } from 'react';
 import mata from './meta'
 import { eventEmitter } from '../../../events';
 import SvgMore from "./svg-more"
-import { isEqual } from "lodash"
+import { isEqual,debounce } from "lodash"
 import { NodeRegistryProps, MetaColumn } from "../../../types"
 import { useCreation } from 'ahooks';
 import { getSetter } from "../../../setter/setterRegistry";
 
 import { createPromiseWrapper } from "../../../utils"
+import { StringSetter } from "../../../setter"
+
+const eventUpdateNode =  debounce((nodeId: string, data: any) => {
+    console.log("debounce eventUpdateNode/")
+    eventEmitter.emit('updateNode', nodeId, { data: data })
+},200)
 
 const OutputRow = ({ item }: { item: MetaColumn }) => {
     return <div className='x-flex x-flex-col x-gap-y-1'>
         <div className='x-flex x-items-center  x-gap-x-1'  >
             {item.label}<div className='x-px-2 x-py-1 x-text-xs x-rounded x-bg-gray-200'>{item.column_type}</div>
-           
+
         </div> {item.children && item.children.length > 0 && <div className='x-pl-6 x-flex x-flex-col x-gap-y-1'>
-                {item.children.map((child, index) => <OutputRow key={`output-child-${index}-${child.id}`} item={child} />)}
-            </div>}
+            {item.children.map((child, index) => <OutputRow key={`output-child-${index}-${child.id}`} item={child} />)}
+        </div>}
     </div>
 }
+
 
 const AutoNode = (props: any) => {
     const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -28,11 +35,17 @@ const AutoNode = (props: any) => {
     const outputRefs = React.useRef<Array<HTMLDivElement | null>>([]);
     const [data, setData] = useState<NodeRegistryProps>()
     const dataRef = useRef<NodeRegistryProps>();
+    const [titleMode, setTitleMode] = useState<string>("show")
+    const titleInputRef = React.useRef<HTMLInputElement | null>(null);
+    // const [title, setTitle] = useState<string>("")
     const nodeSetData = (data: any) => {
+        // data = {...data, version: Date.now().valueOf() }
         dataRef.current = data as NodeRegistryProps
-        // props.node.setData({...data})
-        eventEmitter.emit('updateNode', data.id, {data:data})
+        setData(data as NodeRegistryProps)
+        console.log("nodeSetData data/", data)
+        eventUpdateNode(data.id, data)
     }
+ 
     const inputPromiseRef = useCreation(() => {
         return createPromiseWrapper();
     }, []);
@@ -46,17 +59,18 @@ const AutoNode = (props: any) => {
                 "sx": 1,
                 "sy": 1,
             }
-            if (isEqual(nodeData, data)) return
+            if (isEqual(nodeData, dataRef.current)) return
             setData(nodeData)
-            if(!isEqual(nodeData, dataRef.current)) 
-                dataRef.current = nodeData
+            dataRef.current = nodeData
         }
     }, [props])
 
-    const inputChangeHandler = (e: any) => {
-        // const data = props.node.getData()
-        // console.log("data", data)
-        nodeSetData({ ...(dataRef.current || data), label: e.target.value })
+    const inputChangeHandler = (value: any) => {
+        console.log("input e", value)
+        nodeSetData({
+            ...(dataRef.current || data),
+            label: value
+        })
     };
 
     const computePoints = async () => {
@@ -122,14 +136,22 @@ const AutoNode = (props: any) => {
     const handleChangeOutputTypes = (outputTypes: MetaColumn[]) => {
         nodeSetData({ ...(dataRef.current || data), outputTypes: outputTypes })
     }
-    const handleChangeAttachData = (name:string, value:any) =>{
+    const handleChangeAttachData = (name: string, value: any) => {
         nodeSetData({
             ...(dataRef.current || data),
             attachData: {
-               ...dataRef.current?.attachData,
+                ...dataRef.current?.attachData,
                 [name]: value
             }
         })
+    }
+    const handleTitleDoubleClick = () => {
+        setTitleMode("edit")
+    }
+
+    const handleTitleBlur = () => {
+        setTitleMode("show")
+
     }
     // useEffect(() => {
     //     if (data?.isCanvas && containerRef.current) {
@@ -143,7 +165,12 @@ const AutoNode = (props: any) => {
     useEffect(() => {
         // if (data?.isCanvas && containerRef.current) updateRect();
     }, [data])
-
+    useEffect(() => {
+        if (titleMode != 'show') {
+            titleInputRef.current && titleInputRef.current.focus();
+        }
+    }, [titleMode]);
+   
     useEffect(() => {
         updateRect()
     }, [data?.inputTypes, data?.outputTypes])
@@ -190,8 +217,11 @@ const AutoNode = (props: any) => {
     return <>
         <div ref={containerRef} className={` x-p-3  x-w-full x-bg-white x-flex x-flex-col x-rounded-md  x-border x-border-slate-300  x-shadow-lg x-outline-blue-500 x-text-sm  ${data.selected ? 'x-outline  x-outline-2' : ''}`}>
             <div className=' x-flex x-flex-col  x-gap-1 x-mb-5'>
-                <div className='x-flex x-items-center x-text-gray-900 x-text-base'>
-                    <div className='x-flex-1'> {data.label || '未知节点'}</div>
+                <div className='x-flex x-items-center x-text-gray-900' onDoubleClick={handleTitleDoubleClick} onBlur={handleTitleBlur}>
+                    <div className='x-flex-1'>
+                        {titleMode == "show" && <span className=' x-text-base'>{data.label || '未知节点'}</span>}
+                        {titleMode != "show" && <StringSetter value={data.label} onChange={inputChangeHandler} ref={titleInputRef}  />}
+                    </div>
                     <SvgMore className=" x-w-4 x-h-4 " />
                 </div>
                 <div className='x-text-gray-500'>{data.description || '自动化节点描述'}</div>
@@ -215,15 +245,15 @@ const AutoNode = (props: any) => {
                                         {item.required && <div className=' x-text-red-500'>*</div>}
                                     </div>
                                     <div className='x-flex-1 x-overflow-hidden'>
-                                        <SetterComponent {...setterProps} 
-                                        refInputs={data.refInputs} 
-                                        attachData={data.attachData} 
-                                        onChangeAttachData={handleChangeAttachData} 
-                                        onChangeOutputTypes={handleChangeOutputTypes} 
-                                        key={`${item.id}-${index}`} 
-                                        onChange={(value: any) => {
-                                            handInputSettleChange(item.id, value)
-                                        }} value={typeof data.inputSettles?.[item.id] == "undefined" ? item.default_value : data.inputSettles?.[item.id]} />
+                                        <SetterComponent {...setterProps}
+                                            refInputs={data.refInputs}
+                                            attachData={data.attachData}
+                                            onChangeAttachData={handleChangeAttachData}
+                                            onChangeOutputTypes={handleChangeOutputTypes}
+                                            key={`${item.id}-${index}`}
+                                            onChange={(value: any) => {
+                                                handInputSettleChange(item.id, value)
+                                            }} value={typeof data.inputSettles?.[item.id] == "undefined" ? item.default_value : data.inputSettles?.[item.id]} />
                                     </div>
                                 </div>
                             })}
